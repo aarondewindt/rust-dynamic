@@ -15,6 +15,7 @@ extern crate unsafe_any as uany;
 
 use uany::UnsafeAnyExt;
 
+use std::rc::Rc;
 use std::any::{TypeId, Any};
 use std::{fmt, mem};
 
@@ -41,6 +42,19 @@ impl Dynamic {
             id: TypeId::of::<T>(),
             data: val
         }) as Box<Described<Dyn>>;
+
+        unsafe { mem::transmute(un_sized) }
+    }
+
+    /// Create a new, heap-allocated Dynamic value containing the given value.
+    ///
+    /// The resulting `Dynamic` can be downcasted back to a `T`.
+    #[inline]
+    pub fn new_rc<T: Any>(val: T) -> Rc<Dynamic> {
+        let un_sized = Rc::new(Described {
+            id: TypeId::of::<T>(),
+            data: val
+        }) as Rc<Described<Dyn>>;
 
         unsafe { mem::transmute(un_sized) }
     }
